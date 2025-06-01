@@ -6,6 +6,9 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopNavigation } from "@/components/top-navigation";
 import { Toaster } from "@/components/ui/toaster";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Web3Provider } from "./providers";
+import WalletSyncHandler from "@/components/WalletSyncHandler";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,21 +24,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="light">
-      <body className={inter.className}>
-        <SidebarProvider defaultOpen={true}>
-          <div className="flex min-h-screen bg-gray-50/30">
-            <AppSidebar />
-            <div className="flex-1 flex flex-col w-full transition-all duration-300 ease-in-out">
-              <TopNavigation />
-              <main className="flex-1 p-6 w-full max-w-[2000px] mx-auto">
-                {children}
-              </main>
-            </div>
-          </div>
-          <Toaster />
-        </SidebarProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <Web3Provider>
+        <html lang="en" className="light">
+          <body className={inter.className}>
+            <SidebarProvider defaultOpen={true}>
+              <div className="flex min-h-screen bg-gray-50/30">
+                <AppSidebar />
+                <div className="flex-1 flex flex-col w-full transition-all duration-300 ease-in-out">
+                  <TopNavigation />
+                  <WalletSyncHandler/>
+                  <main className="flex-1 p-6 w-full max-w-[2000px] mx-auto">
+                    {children}
+                  </main>
+                </div>
+              </div>
+              <Toaster />
+            </SidebarProvider>
+          </body>
+        </html>
+      </Web3Provider>
+    </ClerkProvider>
   );
 }

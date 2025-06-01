@@ -1,18 +1,30 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Search, Bell, User, Settings, LogOut, Command } from "lucide-react"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Search, Bell, User, Settings, LogOut, Command } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  UserButton,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+} from "@clerk/nextjs";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export function TopNavigation() {
   return (
@@ -39,38 +51,36 @@ export function TopNavigation() {
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative h-9 w-9">
             <Bell className="w-4 h-4" />
-            <Badge className="absolute items-center -top-1 -right-1 h-5 w-5 p-0 text-xs bg-blue-500">3</Badge>
+            <Badge className="absolute items-center -top-1 -right-1 h-5 w-5 p-0 text-xs bg-blue-500">
+              3
+            </Badge>
           </Button>
 
-          {/* Profile */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 px-2">
-                <Avatar className="h-7 w-7">
-                  <AvatarImage src="/placeholder-user.jpg" />
-                  <AvatarFallback className="text-xs">JD</AvatarFallback>
-                </Avatar>
-                <span className="ml-2 text-sm font-medium">John Doe</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <SignedIn>
+            <ClerkLoaded>
+              <div className="flex items-center gap-4">
+                <ConnectButton />
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </ClerkLoaded>
+            <ClerkLoading>
+              <Loader2 className="size-8 animate-spin text-slate-400" />
+            </ClerkLoading>
+          </SignedIn>
+          <SignedOut>
+            <div className="flex items-center gap-2">
+              <Link href="/sign-in">
+                <Button variant="ghost" size="sm">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/sign-up">
+                <Button size="sm">Sign up</Button>
+              </Link>
+            </div>
+          </SignedOut>
         </div>
       </div>
     </header>
-  )
+  );
 }
