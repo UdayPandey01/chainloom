@@ -1,34 +1,106 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Webhook, Code, Clock, Settings, Bell, Play, Save, ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Webhook,
+  Code,
+  Clock,
+  Settings,
+  Bell,
+  Play,
+  Save,
+  ArrowLeft,
+} from "lucide-react";
 
 export default function CreateJob() {
-  const [jobType, setJobType] = useState("webhook")
-  const [triggerType, setTriggerType] = useState("interval")
+  // Job configuration states
+  const [jobType, setJobType] = useState("webhook");
+  const [triggerType, setTriggerType] = useState("interval");
+  
+  // Form data states
+  const [jobName, setJobName] = useState("");
+  const [intervalValue, setIntervalValue] = useState("");
+  const [intervalUnit, setIntervalUnit] = useState("");
+  const [cronExpression, setCronExpression] = useState("");
+  const [customLogic, setCustomLogic] = useState("");
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [payload, setPayload] = useState("");
+  const [contractAddress, setContractAddress] = useState("");
+  const [functionCall, setFunctionCall] = useState("");
+  const [notifications, setNotifications] = useState({
+    discord: false,
+    email: false,
+    webhook: false,
+  });
+
+  const handleCreateJob = async () => {
+    const jobData = {
+      jobName,
+      jobType,
+      triggerType,
+      triggerConfig:
+        triggerType === "interval"
+          ? { intervalValue, intervalUnit }
+          : triggerType === "cron"
+          ? { cronExpression }
+          : { customLogic },
+      actionConfig:
+        jobType === "webhook"
+          ? { webhookUrl, payload }
+          : { contractAddress, functionCall },
+      notifications,
+    };
+
+    // try {
+    //   const res = await fetch("/api/jobs", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(jobData),
+    //   });
+    //   if (!res.ok) throw new Error("Failed to create job");
+    //   alert("Job created successfully!");
+    // } catch (error) {
+    //   console.error("Error creating job:", error);
+    //   alert("Something went wrong!");
+    // }
+
+    console.log(jobData)
+  };
+
+  const handleNotificationChange = (type, checked) => {
+    setNotifications(prev => ({
+      ...prev,
+      [type]: checked
+    }));
+  };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Link href="/">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-        </Link>
+        <Button variant="ghost" size="icon">
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Create New Job</h1>
-          <p className="text-gray-600 mt-1">Set up automated triggers and actions</p>
+          <p className="text-gray-600 mt-1">
+            Set up automated triggers and actions
+          </p>
         </div>
       </div>
 
@@ -46,7 +118,13 @@ export default function CreateJob() {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="jobName">Job Name</Label>
-                <Input id="jobName" placeholder="e.g., Discord Price Alert" className="mt-1" />
+                <Input
+                  id="jobName"
+                  placeholder="e.g., Discord Price Alert"
+                  className="mt-1"
+                  value={jobName}
+                  onChange={(e) => setJobName(e.target.value)}
+                />
               </div>
 
               <div>
@@ -93,11 +171,17 @@ export default function CreateJob() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="intervalValue">Every</Label>
-                      <Input id="intervalValue" placeholder="5" className="mt-1" />
+                      <Input
+                        id="intervalValue"
+                        placeholder="5"
+                        className="mt-1"
+                        value={intervalValue}
+                        onChange={(e) => setIntervalValue(e.target.value)}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="intervalUnit">Unit</Label>
-                      <Select>
+                      <Select value={intervalUnit} onValueChange={setIntervalUnit}>
                         <SelectTrigger className="mt-1">
                           <SelectValue placeholder="Select unit" />
                         </SelectTrigger>
@@ -114,8 +198,16 @@ export default function CreateJob() {
                 <TabsContent value="cron" className="space-y-4 mt-4">
                   <div>
                     <Label htmlFor="cronExpression">CRON Expression</Label>
-                    <Input id="cronExpression" placeholder="0 */5 * * * *" className="mt-1 font-mono" />
-                    <p className="text-xs text-gray-500 mt-1">Example: 0 */5 * * * * (every 5 minutes)</p>
+                    <Input
+                      id="cronExpression"
+                      placeholder="0 */5 * * * *"
+                      className="mt-1 font-mono"
+                      value={cronExpression}
+                      onChange={(e) => setCronExpression(e.target.value)}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Example: 0 */5 * * * * (every 5 minutes)
+                    </p>
                   </div>
                 </TabsContent>
 
@@ -129,6 +221,8 @@ if (ethPrice > 3000) {
   return true;
 }"
                       className="mt-1 font-mono h-32"
+                      value={customLogic}
+                      onChange={(e) => setCustomLogic(e.target.value)}
                     />
                   </div>
                 </TabsContent>
@@ -146,7 +240,13 @@ if (ethPrice > 3000) {
                 <>
                   <div>
                     <Label htmlFor="webhookUrl">Webhook URL</Label>
-                    <Input id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." className="mt-1" />
+                    <Input
+                      id="webhookUrl"
+                      placeholder="https://discord.com/api/webhooks/..."
+                      className="mt-1"
+                      value={webhookUrl}
+                      onChange={(e) => setWebhookUrl(e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="payload">Payload (JSON)</Label>
@@ -154,6 +254,8 @@ if (ethPrice > 3000) {
                       id="payload"
                       placeholder='{"content": "ETH price is now $3,200!"}'
                       className="mt-1 font-mono h-24"
+                      value={payload}
+                      onChange={(e) => setPayload(e.target.value)}
                     />
                   </div>
                 </>
@@ -161,11 +263,23 @@ if (ethPrice > 3000) {
                 <>
                   <div>
                     <Label htmlFor="contractAddress">Contract Address</Label>
-                    <Input id="contractAddress" placeholder="0x..." className="mt-1 font-mono" />
+                    <Input
+                      id="contractAddress"
+                      placeholder="0x..."
+                      className="mt-1 font-mono"
+                      value={contractAddress}
+                      onChange={(e) => setContractAddress(e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="functionCall">Function Call</Label>
-                    <Input id="functionCall" placeholder="transfer(address,uint256)" className="mt-1 font-mono" />
+                    <Input
+                      id="functionCall"
+                      placeholder="transfer(address,uint256)"
+                      className="mt-1 font-mono"
+                      value={functionCall}
+                      onChange={(e) => setFunctionCall(e.target.value)}
+                    />
                   </div>
                 </>
               )}
@@ -183,15 +297,27 @@ if (ethPrice > 3000) {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="discord" />
+                  <Checkbox 
+                    id="discord" 
+                    checked={notifications.discord}
+                    onCheckedChange={(checked) => handleNotificationChange('discord', checked)}
+                  />
                   <Label htmlFor="discord">Discord</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="email" />
+                  <Checkbox 
+                    id="email" 
+                    checked={notifications.email}
+                    onCheckedChange={(checked) => handleNotificationChange('email', checked)}
+                  />
                   <Label htmlFor="email">Email</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="webhook-notify" />
+                  <Checkbox 
+                    id="webhook-notify" 
+                    checked={notifications.webhook}
+                    onCheckedChange={(checked) => handleNotificationChange('webhook', checked)}
+                  />
                   <Label htmlFor="webhook-notify">Webhook</Label>
                 </div>
               </div>
@@ -209,7 +335,7 @@ if (ethPrice > 3000) {
             <CardContent className="space-y-3">
               <div>
                 <Label className="text-xs text-gray-500">NAME</Label>
-                <p className="font-medium">Discord Price Alert</p>
+                <p className="font-medium">{jobName || "Untitled Job"}</p>
               </div>
               <div>
                 <Label className="text-xs text-gray-500">TYPE</Label>
@@ -220,12 +346,18 @@ if (ethPrice > 3000) {
               <div>
                 <Label className="text-xs text-gray-500">TRIGGER</Label>
                 <Badge variant="outline" className="mt-1">
-                  {triggerType === "interval" ? "Every 5 minutes" : triggerType === "cron" ? "CRON" : "Custom Logic"}
+                  {triggerType === "interval"
+                    ? `Every ${intervalValue || "?"} ${intervalUnit || "units"}`
+                    : triggerType === "cron"
+                    ? "CRON"
+                    : "Custom Logic"}
                 </Badge>
               </div>
               <div>
                 <Label className="text-xs text-gray-500">STATUS</Label>
-                <Badge className="mt-1 bg-green-100 text-green-700">Ready to deploy</Badge>
+                <Badge className="mt-1 bg-green-100 text-green-700">
+                  Ready to deploy
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -240,10 +372,15 @@ if (ethPrice > 3000) {
               <Save className="w-4 h-4 mr-2" />
               Save Draft
             </Button>
-            <Button className="w-full bg-green-600 hover:bg-green-700">Create Job</Button>
+            <Button 
+              className="w-full bg-green-600 hover:bg-green-700"
+              onClick={handleCreateJob}
+            >
+              Create Job
+            </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
